@@ -1,0 +1,81 @@
+﻿@page "/"
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+<DataGrid TItem="Icon"
+          Data="@dataModels"
+          ShowPager="true"
+          Sortable="true"
+          Filterable="true"
+          ShowPageSizes="true"
+          PageSize="50"
+          Bordered="true"
+          PagerPosition="DataGridPagerPosition.Bottom"
+          Responsive="true">
+    <DataGridCommandColumn TItem="Icon" />
+    <DataGridColumn TItem="Icon" Field="@nameof(Icon.Name)" Caption="Icon">
+        <DisplayTemplate>
+            @{
+                int imgBase = int.Parse((context as Icon).ElementId);
+                <Icon Name="(IconName)imgBase" />
+            }
+        </DisplayTemplate>
+    </DataGridColumn>
+    <DataGridColumn TItem="Icon" Field="@nameof(Icon.Name)" Caption="Name">
+        <FilterTemplate>
+            <Autocomplete Data="@dataModels"
+                          TextField="@((item)=>item.Name.ToString())"
+                          ValueField="@((item)=>item.Name)"
+                          SelectedValue="@selectedSearchValue"
+                          TValue="object"
+                          TItem="Icon"
+                          SelectedValueChanged="@((n) => MySearchHandler(n, context))"
+                          Placeholder="Name..." Filter="AutocompleteFilter.Contains"
+                          @oninput="@(v => context.TriggerFilterChange(v.Value.ToString()))"
+                          DelayTextOnKeyPress="true"
+                          MinLength="2" />
+        </FilterTemplate>
+    </DataGridColumn>
+    <DataGridNumericColumn TItem="Icon" Field="@nameof(Icon.ElementId)" Caption="Number" />
+</DataGrid>
+
+@code {
+    List<Icon> dataModels;
+    object selectedSearchValue { get; set; }
+
+    void MySearchHandler(object newValue, FilterContext context)
+    {
+        selectedSearchValue = newValue;
+        context.TriggerFilterChange(selectedSearchValue?.ToString());
+    }
+
+    void getDataForGrid()
+    {
+        int count = Enum.GetNames(typeof(IconName)).Length;
+        dataModels = new List<Icon>();
+        for (int i = 0; i < count; i++)
+        {
+            if (i == 5)
+            {
+                dataModels.Add(new Icon { Name = null, ElementId = i.ToString() });
+            }
+            else if (i == 8)
+            {
+                dataModels.Add(new Icon { Name = null, ElementId = i.ToString() });
+            }
+            else
+                dataModels.Add(new Icon { Name = Enum.GetName(typeof(IconName), i), ElementId = i.ToString() });
+        }
+    }
+
+
+    protected override void OnInitialized()
+    {
+        getDataForGrid();
+    }
+
+}
